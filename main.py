@@ -21,33 +21,35 @@
 
 # print(results)
 
-class player:
+import requests
+from bs4 import BeautifulSoup
 
-    def __init__(self, name, team):
-        self.name = name
-        self.team = team
+url = "https://weworkremotely.com/categories/remote-full-stack-programming-jobs"
 
-    def introduce(self):
-        print(f"Hello, I'm {self.name} from team {self.team}")
+all_jobs = []
 
-class team:
+def scrape_page(url):
+    response = requests.get(url)
 
-    def __init__(self, teamName):
-        self.teamName = teamName
-        self.players = []
+    # print(response.content)
 
-    def introduce(self):
-        for player in self.players:
-            player.introduce()
+    soup = BeautifulSoup(response.content, "html.parser")
 
-    def add_player(self, name):
-        new_player = player(name, self.teamName)
-        self.players.append(new_player)
+    jobs = soup.find("section", class_="jobs").find_all("li")[:-1]
 
-team_x = team("x")
-team_y = team("y")
+    for job in jobs:
+        title = job.find("h3", class_="new-listing__header__title").text
+        company, position, region = job.find_all("span", class_="company")
+        url = job.find("div", class_="tooltip").next_sibling["href"]
+        job_data = {
+            "title": title,
+            "company": company,
+            "position":position,
+            "region": region,
+            "url": f"http://weworkremotedly.com{url}",
+        }
+        all_jobs.append(job_data)
 
-team_x.add_player("alex")
-team_y.add_player("beaver")
 
-team_y.introduce()
+
+# print(jobs)
