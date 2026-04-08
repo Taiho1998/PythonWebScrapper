@@ -24,32 +24,45 @@
 import requests
 from bs4 import BeautifulSoup
 
-url = "https://weworkremotely.com/categories/remote-full-stack-programming-jobs"
+url = "https://weworkremotely.com/remote-full-time-jobs"
 
 all_jobs = []
 
-def scrape_page(url):
-    response = requests.get(url)
+# def scrape_page(url):
+response = requests.get(url)
 
-    # print(response.content)
+# print(response.content)
 
-    soup = BeautifulSoup(response.content, "html.parser")
+soup = BeautifulSoup(response.content, "html.parser")
 
-    jobs = soup.find("section", class_="jobs").find_all("li")[:-1]
+jobs = soup.find("section", class_ = "jobs").find_all("li")[:-1]
 
-    for job in jobs:
-        title = job.find("h3", class_="new-listing__header__title").text
-        company, position, region = job.find_all("span", class_="company")
-        url = job.find("div", class_="tooltip").next_sibling["href"]
-        job_data = {
-            "title": title,
-            "company": company,
-            "position":position,
-            "region": region,
-            "url": f"http://weworkremotedly.com{url}",
-        }
-        all_jobs.append(job_data)
+for job in jobs:
+    title = job.find("span", class_ = "new-listing__header__title__text").text
+    company = job.find("p", class_ = "new-listing__company-name").text
+  
 
+    temp = job.find_all("p", class_ = "new-listing__categories__category")
 
+    region = temp[-1].text
 
-# print(jobs)
+    position = [tag for tag in temp
+                if tag.get("class") == ["new-listing__categories__category"]][0].text
+
+    url = job.find("a", class_ = "listing-link--unlocked")["href"]
+    job_data = {
+        "title": title,
+        "company": company,
+        "position": position,
+        "region": region,
+        "url": f"http://weworkremotely.com{url}",
+    }
+    all_jobs.append(job_data)
+
+# response = requests.get(url)
+
+# soup = BeautifulSoup(response.content, "html.parser")
+
+# jobs = soup.find("section", class_="jobs").find_all("li")[:-1]
+
+print(all_jobs)
