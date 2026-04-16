@@ -28,41 +28,51 @@ url = "https://weworkremotely.com/remote-full-time-jobs"
 
 all_jobs = []
 
-# def scrape_page(url):
-response = requests.get(url)
+def scrape_page(url):
 
-# print(response.content)
+    print(f"Scrapping {url}...")
 
-soup = BeautifulSoup(response.content, "html.parser")
+    response = requests.get(url)
 
-jobs = soup.find("section", class_ = "jobs").find_all("li")[:-1]
+    soup = BeautifulSoup(response.content, "html.parser")
 
-for job in jobs:
-    title = job.find("span", class_ = "new-listing__header__title__text").text
-    company = job.find("p", class_ = "new-listing__company-name").text
-  
+    jobs = soup.find("section", class_ = "jobs").find_all("li")[:-1]
 
-    temp = job.find_all("p", class_ = "new-listing__categories__category")
+    for job in jobs:
+        title = job.find("span", class_ = "new-listing__header__title__text").text
+        company = job.find("p", class_ = "new-listing__company-name").text
+    
 
-    region = temp[-1].text
+        temp = job.find_all("p", class_ = "new-listing__categories__category")
 
-    position = [tag for tag in temp
-                if tag.get("class") == ["new-listing__categories__category"]][0].text
+        region = temp[-1].text
 
-    url = job.find("a", class_ = "listing-link--unlocked")["href"]
-    job_data = {
-        "title": title,
-        "company": company,
-        "position": position,
-        "region": region,
-        "url": f"http://weworkremotely.com{url}",
-    }
-    all_jobs.append(job_data)
+        position = [tag for tag in temp
+                    if tag.get("class") == ["new-listing__categories__category"]][0].text
 
-# response = requests.get(url)
+        url = job.find("a", class_ = "listing-link--unlocked")["href"]
+        job_data = {
+            "title": title,
+            "company": company,
+            "position": position,
+            "region": region,
+            "url": f"http://weworkremotely.com{url}",
+        }
+        all_jobs.append(job_data)
 
-# soup = BeautifulSoup(response.content, "html.parser")
+def get_pages(url):
 
+    response = requests.get(f"{url}?page=1")
+    soup = BeautifulSoup(response.content, "html.parser")
+    return len(soup.find("div", class_="pagination").find_all("span", class_="page"))
+
+total_pages = get_pages(url)
+
+for x in range(total_pages):
+    url = f"https://weworkremotely.com/remote-full-time-jobs?page={x+1}"
+    scrape_page(url)
+
+print(len(all_jobs))
 # jobs = soup.find("section", class_="jobs").find_all("li")[:-1]
 
-print(all_jobs)
+# print(all_jobs)
